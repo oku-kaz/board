@@ -25,6 +25,9 @@
     <title>Board {block title}{/block}</title>
   </head>
   <body>
+{*
+  test
+*}
     <header class="navbar navbar-inverse">
       <div class="container">
         <div class="navbar-header">
