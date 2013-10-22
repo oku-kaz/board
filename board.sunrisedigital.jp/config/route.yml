@@ -1,0 +1,27 @@
+routes:
+  thread_default:
+    route:  /thread/:thread_id/:action
+    defaults:
+      module: default
+      controller: thread
+      action: index
+    reqs:
+      thread_id:  '[0-9]+'
+#  sample:
+#    route:          /:placeholder/:controller/:action
+#    defaults:
+#      module:       default
+#      controller:   index
+#      action:       index
+#    reqs:
+#      placeholder:     '[a-z]{2}'
+
+#  regex_sample:
+#    type:         Zend_Controller_Router_Route_Regex
+#    route:        job-(\d+)/([^/]+)
+#    defaults:
+#      module:     default
+#      controller: job
+#    map:
+#      1:          job_id
+#      2:          action
