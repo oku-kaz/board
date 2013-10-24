@@ -56,6 +56,8 @@ class AccountController extends Sdx_Controller_Action_Http
     if($this->_getParam('submit'))
     {
       $form->bind($this->_getAllParams());
+      
+      $account = new Bd_Orm_Main_Account();
       if($form->execValidate())
       {
         
