@@ -58,10 +58,33 @@ class AccountController extends Sdx_Controller_Action_Http
       $form->bind($this->_getAllParams());
       
       $account = new Bd_Orm_Main_Account();
-      if($form->execValidate())
-      {
+      $db = $account->updateConnection();
+      
+      $db->beginTransaction();
+      try {
+        //Validateの実行はFOR UPDATEのためトランザクションの内側
+        if($form->execValidate())
+        {
+          $account
+                  ->setLoginId($this->_getParam('login_id'))
+                  ->setPassword($this->_getparam('password'))
+                  ->setName($this->_getparam('name'));
         
+          $account->save();
+          $db->commit();
+          $this->redirectAfterSave('/account/create');
+          
+        }
+        else
+        {
+          $db->rollback();
+        }
+        
+      } catch (Exception $ex) {
+        $db->rollback();
+        throw $ex;
       }
+      
     }
     
     $this->view->assign('form', $form);
