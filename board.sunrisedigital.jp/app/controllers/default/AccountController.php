@@ -65,9 +65,10 @@ class AccountController extends Sdx_Controller_Action_Http
         //Validateの実行はFOR UPDATEのためトランザクションの内側
         if($form->execValidate())
         {
+          
           $account
                   ->setLoginId($this->_getParam('login_id'))
-                  ->setPassword($this->_getparam('password'))
+                  ->setRawPassword($this->_getparam('password'))
                   ->setName($this->_getparam('name'));
         
           $account->save();
@@ -88,5 +89,25 @@ class AccountController extends Sdx_Controller_Action_Http
     }
     
     $this->view->assign('form', $form);
+  }
+  public function listAction()
+  {
+    $t_account = Bd_Orm_Main_Account::createTable();
+    $t_entry = Bd_Orm_Main_Entry::createTable();
+    $t_thread = Bd_Orm_Main_Thread::createTable();
+    
+    //JOIN
+    $t_account->addJoinLeft($t_entry);
+    $t_entry->addJoinLeft($t_thread);
+    
+    //selectを生成
+    $select = $t_account->getSelectWithJoin();
+    $select->order('id DESC');
+    
+    //$listはSdx_Db_Record_Listのインスタンス
+    $list = $t_account->fetchAll($select);
+    
+    //テンプレートにレコードリストのままアサイン
+    $this->view->assign('account_list', $list);
   }
 }

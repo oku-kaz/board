@@ -19,7 +19,7 @@ abstract class Bd_Orm_Main_Base_Form_Account extends Sdx_Form
      */
     public static function createIdElement(Sdx_Db_Record $record = null)
     {
-        return new Sdx_Form_Element_Hidden(array('name'=>'id'));
+        return new Sdx_Form_Element_Text(array('name'=>'id'));
     }
 
     public static function createIdValidator(Sdx_Form_Element $element, Sdx_Db_Record $record = null)

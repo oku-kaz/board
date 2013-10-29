@@ -30,19 +30,6 @@ abstract class Bd_Orm_Main_Base_Form_AutoLogin extends Sdx_Form
     /**
      * @return Sdx_Form_Element
      */
-    public static function createAccountIdElement(Sdx_Db_Record $record = null)
-    {
-        return new Sdx_Form_Element_Text(array('name'=>'account_id'));
-    }
-
-    public static function createAccountIdValidator(Sdx_Form_Element $element, Sdx_Db_Record $record = null)
-    {
-        $element->addValidator(new Sdx_Validate_NotEmpty());
-    }
-
-    /**
-     * @return Sdx_Form_Element
-     */
     public static function createExpireDateElement(Sdx_Db_Record $record = null)
     {
         return new Sdx_Form_Element_Text(array('name'=>'expire_date'));
@@ -62,13 +49,6 @@ abstract class Bd_Orm_Main_Base_Form_AutoLogin extends Sdx_Form
         	$element = call_user_func(array('Bd_Orm_Main_Form_AutoLogin', 'createHashElement'), $this->_record);
         	$this->setElement($element);
         	call_user_func(array('Bd_Orm_Main_Form_AutoLogin', 'createHashValidator'), $element, $this->_record);
-        }
-        
-        if(!in_array('account_id', $this->_except_list))
-        {
-        	$element = call_user_func(array('Bd_Orm_Main_Form_AutoLogin', 'createAccountIdElement'), $this->_record);
-        	$this->setElement($element);
-        	call_user_func(array('Bd_Orm_Main_Form_AutoLogin', 'createAccountIdValidator'), $element, $this->_record);
         }
         
         if(!in_array('expire_date', $this->_except_list))

@@ -13,11 +13,27 @@ board_master:
   tables:
     account:
       relations:
+        - type: has_one
+          table:  auto_login
+          references: id
+          foreign:  account_id
+
+    thread:
+      relations:
         - type: one_many
           table:  entry
           references: id
-          foreign:  account_id
+          foreign:  thread_id
           
+    entry:
+      relations:
+        - type: many_one
+          table:  account
+          references: account_id
+          foreign:  id
+          
+
+        
 #  tables:
 #    table_name:
 #      const:

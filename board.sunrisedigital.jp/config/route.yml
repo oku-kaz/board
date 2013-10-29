@@ -7,6 +7,26 @@ routes:
       action: index
     reqs:
       thread_id:  '[0-9]+'
+      
+  thread_list:
+    route:  /thread/list/:page
+    defaults:
+      module: default
+      controller: thread
+      action: list
+    reqs:
+      page:  '[0-9]+'
+      
+  thread_main:
+    route:  /thread/main/:thread_id/:page
+    defaults:
+      module: default
+      controller: thread
+      action: main
+    reqs:
+      thread_id:  '[0-9]+'
+      page:  '[0-9]+'
+      
 #  sample:
 #    route:          /:placeholder/:controller/:action
 #    defaults:
