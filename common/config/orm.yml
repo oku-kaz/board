@@ -20,6 +20,15 @@ board_master:
 
     thread:
       relations:
+        - type: many_many
+          table:  tag
+          mid_table:  thread_tag
+          references: id
+          foreign:  thread_id
+        - type: many_one
+          table:  genre
+          references: genre_id
+          foreign:  id
         - type: one_many
           table:  entry
           references: id
@@ -32,6 +41,13 @@ board_master:
           references: account_id
           foreign:  id
           
+    tag:
+      relations:
+        - type:  many_many
+          table: thread
+          mid_table: thread_tag
+          references: id
+          foreign:  tag_id
 
         
 #  tables:
