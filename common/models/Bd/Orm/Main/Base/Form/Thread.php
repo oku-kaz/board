@@ -40,6 +40,32 @@ abstract class Bd_Orm_Main_Base_Form_Thread extends Sdx_Form
         $element->addValidator(new Sdx_Validate_NotEmpty());$element->addValidator(new Sdx_Validate_StringLength(array('max'=>80)));
     }
 
+    /**
+     * @return Sdx_Form_Element
+     */
+    public static function createMMTagIdElement(Sdx_Db_Record $record = null)
+    {
+        return new Sdx_Form_Element_Text(array('name'=>'Tag__id'));
+    }
+
+    public static function createMMTagIdValidator(Sdx_Form_Element $element, Sdx_Db_Record $record = null)
+    {
+        
+    }
+
+    /**
+     * @return Sdx_Form_Element
+     */
+    public static function createGenreIdElement(Sdx_Db_Record $record = null)
+    {
+        return new Sdx_Form_Element_Text(array('name'=>'genre_id'));
+    }
+
+    public static function createGenreIdValidator(Sdx_Form_Element $element, Sdx_Db_Record $record = null)
+    {
+        
+    }
+
     protected function _init()
     {
         $this->setName('thread');
@@ -56,6 +82,22 @@ abstract class Bd_Orm_Main_Base_Form_Thread extends Sdx_Form
         	$element = call_user_func(array('Bd_Orm_Main_Form_Thread', 'createTitleElement'), $this->_record);
         	$this->setElement($element);
         	call_user_func(array('Bd_Orm_Main_Form_Thread', 'createTitleValidator'), $element, $this->_record);
+        }
+        
+        
+        
+        if(!in_array('Tag__id', $this->_except_list))
+        {
+        	$element = call_user_func(array('Bd_Orm_Main_Form_Thread', 'createMMTagIdElement'), $this->_record);
+        	$this->setElement($element);
+        	call_user_func(array('Bd_Orm_Main_Form_Thread', 'createMMTagIdValidator'), $element, $this->_record);
+        }
+        
+        if(!in_array('genre_id', $this->_except_list))
+        {
+        	$element = call_user_func(array('Bd_Orm_Main_Form_Thread', 'createGenreIdElement'), $this->_record);
+        	$this->setElement($element);
+        	call_user_func(array('Bd_Orm_Main_Form_Thread', 'createGenreIdValidator'), $element, $this->_record);
         }
     }
 
