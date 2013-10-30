@@ -130,7 +130,7 @@ class FooController extends Sdx_Controller_Action_Http
     //テーブルクラスの取得
     $t_account = Bd_Orm_Main_Account::createTable();
     //主キー1のレコードを取得
-    $account = $t_account->findByPkey(1);
+    $account = $t_account->findByPkey(8);
     
     $db = $account->updateConnection();
     

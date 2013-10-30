@@ -1,8 +1,5 @@
 <?php
 
-define('THREAD_LIMIT' , 5);
-define('ENTRY_LIMIT' , 10);
-
 /**
  *
  *
@@ -13,6 +10,9 @@ define('ENTRY_LIMIT' , 10);
  **/
 class ThreadController extends Sdx_Controller_Action_Http
 {
+  
+  const THREAD_LIMIT = 5;
+  const ENTRY_LIMIT = 10;
  
   public function indexAction()
   {
@@ -21,70 +21,40 @@ class ThreadController extends Sdx_Controller_Action_Http
   
   public function listAction()
   {
-    $thread_page = $this->_getParam('page') ? $this->_getParam('page') : 1;
+    $page = $this->_getParam('page', 1);
     
     $t_account = Bd_Orm_Main_Account::createTable();
     $t_entry = Bd_Orm_Main_Entry::createTable();
     $t_thread = Bd_Orm_Main_Thread::createTable();
-    
-    //JOIN
-    //$t_thread->addJoinLeft($t_entry);
-    //$t_entry->addJoinLeft($t_account);
     
     //selectを生成
     $select = $t_thread->getSelectWithJoin();
     $select->order('id DESC');
     
     $thread_count = $t_thread->count($select);
-//    Sdx_Debug::dump($thread_count, '$thread_count ');
+    $pager_obj = new Sdx_Pager(self::THREAD_LIMIT, $thread_count);
+    $pager_obj->setPage($page);
     
-    $pager_obj = new Sdx_Pager(THREAD_LIMIT, $thread_count);
-    $pager_obj->setPage($thread_page);
+    $select->limitPager($pager_obj);
     
-/*    $sdx_context = Sdx_Context::getInstance();
-    Sdx_Debug::dump($sdx_context->getVar('signed_account')->getId(), '$Id ');
-    */
-    $select->limit(THREAD_LIMIT, ($thread_page - 1) * THREAD_LIMIT);
-    
-//    $t_thread->appendJoin($select);
     //$listはSdx_Db_Record_Listのインスタンス
     $list = $t_thread->fetchAll($select);
     
-/*    
-    unset($select);
-    
-    $t_entry->addJoinLeft($t_account);
-    foreach($list as $thread_key => $thread_current){
-      $select = $t_entry->getSelectWithJoin();
-      $select->where('thread_id = ?' ,$thread_current->getId());
-      $select->order('id DESC');
-      $select->limit(3, 0);
-      $entry_list = $t_entry->fetchAll($select);
-//      $list[$thread_key]['getEntry'] = $entry_list;
-    }
- * 
- */
-    
     //テンプレートにレコードリストのままアサイン
     $this->view->assign('thread_list', $list);
-    
+    //テンプレートでselect条件変更するためオブジェクト渡し
     $this->view->assign('t_entry', $t_entry);
-    
-    $this->view->assign('current_page', $thread_page);
-    $this->view->assign('max_page', ceil($thread_count / THREAD_LIMIT));
-    
-    $this->view->assign('prev_page', $pager_obj->getPrevPageId());
-    $this->view->assign('next_page', $pager_obj->getNextPageId());
-    
-    $this->view->assign('last_page', $pager_obj->getLastPageId());
-    
+    //ページャ用
+    $this->view->assign('pager', $pager_obj);
   }
   
   public function mainAction()
   {
-    
-    $page = $this->_getParam('page') ? $this->_getParam('page') : 1;
-    $thread_id = $this->_getParam('thread_id') ? $this->_getParam('thread_id') : 1;
+    $page = $this->_getParam('page', 1);
+    if(!$thread_id = $this->_getParam('thread_id')){
+      //スレッドが不明な場合リストページへ
+      $this->redirect('/thread/list');
+    }
 
     $t_account = Bd_Orm_Main_Account::createTable();
     $t_entry = Bd_Orm_Main_Entry::createTable();
@@ -98,7 +68,6 @@ class ThreadController extends Sdx_Controller_Action_Http
     $form
             ->setActionCurrentPage() //アクション先を現在のURLに設定
             ->setMethodToPost();  //メソッドをポストに変更
-    
     //各エレメントをフォームにセット
     //body
     $elem = new Sdx_Form_Element_Text();
@@ -109,51 +78,48 @@ class ThreadController extends Sdx_Controller_Action_Http
             ;
     $form->setElement($elem);
     
+    $sdx_context = Sdx_Context::getInstance();
+    //submit時
     if($this->_getParam('submit'))
     {
-      $sdx_context = Sdx_Context::getInstance();
+      if(!($sdx_context->getVar('signed_account'))){
+        //ログインページへ
+        $this->redirect('/secure/login');
+      }
+      
       $form->bind($this->_getAllParams());
       
       $entry = new Bd_Orm_Main_Entry();
       $db = $entry->updateConnection();
       
-      $db->beginTransaction();
-      try {
-        //Validateの実行はFOR UPDATEのためトランザクションの内側
-        if($form->execValidate())
-        {
+      if($form->execValidate()){
+        $db->beginTransaction();
+        try {
           $entry
                   ->setThreadId($this->_getParam('thread_id'))
                   ->setAccountId($sdx_context->getVar('signed_account')->getId())
                   ->setBody($this->_getParam('body'))
                   ;
-                  
           $entry->save();
           $db->commit();
-          $this->redirectAfterSave('/thread/main'.$thread_id.'/'.$page);
-          
-        }
-        else
-        {
+          $this->redirectAfterSave('/thread/main/'.$thread_id.'/'.$page);
+        } catch (Exception $ex) {
           $db->rollback();
+          throw $ex;
         }
-        
-      } catch (Exception $ex) {
-        $db->rollback();
-        throw $ex;
       }
-      
     }
     
     $this->view->assign('form', $form);
 
-    
-    
-    
     //selectを生成
     $select = $t_thread->getSelectWithJoin();
+    $thread = $t_thread->fetchByPkeys(array('id'=>$thread_id));
+    /*
     $select->where('id = ?' ,$thread_id);
     $thread = $t_thread->fetchAll($select);
+     * 
+     */
     
     unset($select);
     
@@ -162,30 +128,20 @@ class ThreadController extends Sdx_Controller_Action_Http
     $select->order('id DESC');
     
     $count = $t_entry->count($select);
-    
-    $select->limit(ENTRY_LIMIT, ($page - 1) * ENTRY_LIMIT);
-    
-    $pager_obj = new Sdx_Pager(ENTRY_LIMIT, $count);
+    $pager_obj = new Sdx_Pager(self::ENTRY_LIMIT, $count);
     $pager_obj->setPage($page);
     
-    $select->limit(ENTRY_LIMIT, ($page - 1) * ENTRY_LIMIT);
+    $select->limitPager($pager_obj);
     
     //$listはSdx_Db_Record_Listのインスタンス
     $list = $t_entry->fetchAll($select);
     
-    $this->view->assign('thread_id', $thread_id);
-    $this->view->assign('thread', $thread);
-    
+    $this->view->assign('thread', $thread[0]);
+    //テンプレートにレコードリストのままアサイン
     $this->view->assign('entry_list', $list);
-    
-    $this->view->assign('current_page', $page);
-    $this->view->assign('max_page', ceil($count / THREAD_LIMIT));
-    
-    $this->view->assign('prev_page', $pager_obj->getPrevPageId());
-    $this->view->assign('next_page', $pager_obj->getNextPageId());
-    
-    $this->view->assign('last_page', $pager_obj->getLastPageId());
-    
+    //ページャ用
+    $this->view->assign('pager', $pager_obj);
+
   }
 
 }
