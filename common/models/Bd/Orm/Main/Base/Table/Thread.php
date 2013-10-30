@@ -8,7 +8,8 @@ abstract class Bd_Orm_Main_Base_Table_Thread extends Bd_Db_Table
     private static $_columns = array(
         'id',
         'title',
-        'created_at'
+        'created_at',
+        'genre_id'
         );
 
     private static $_dbnames = array(
@@ -41,12 +42,36 @@ abstract class Bd_Orm_Main_Base_Table_Thread extends Bd_Db_Table
         if(is_null(self::$_relations))
         {
         	self::$_relations = array();
+        	self::$_relations['Tag'] = Sdx_Db_Relation::create(
+        		Sdx_Db_Relation::TYPE_MANY_MANY,
+        		'Tag',
+        		'Thread',
+        		array('reference'=>'id', 'foreign'=>'thread_id'),
+        		'Bd_Orm_Main_Tag',
+        		'Bd_Orm_Main_ThreadTag'
+        	);
+        	self::$_relations['Genre'] = Sdx_Db_Relation::create(
+        		Sdx_Db_Relation::TYPE_MANY_ONE,
+        		'Genre',
+        		'Thread',
+        		array('reference'=>'genre_id', 'foreign'=>'id'),
+        		'Bd_Orm_Main_Genre',
+        		null
+        	);
         	self::$_relations['Entry'] = Sdx_Db_Relation::create(
         		Sdx_Db_Relation::TYPE_ONE_MANY,
         		'Entry',
         		'Thread',
         		array('reference'=>'id', 'foreign'=>'thread_id'),
         		'Bd_Orm_Main_Entry',
+        		null
+        	);
+        	self::$_relations['ThreadTag'] = Sdx_Db_Relation::create(
+        		Sdx_Db_Relation::TYPE_ONE_MANY,
+        		'ThreadTag',
+        		'Thread',
+        		array('reference'=>'id', 'foreign'=>'thread_id'),
+        		'Bd_Orm_Main_ThreadTag',
         		null
         	);
         }
