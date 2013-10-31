@@ -143,7 +143,7 @@ abstract class Bd_Orm_Main_Base_Account extends Bd_Db_Record
         if($arg || !array_key_exists('AutoLogin', $this->_relations))
         {
         	$id = $this->getId();
-        	$record = null;
+        
         	if($id)
         	{
         	    list($select, $db) = $this->_detectGetterArg($arg, 'getAutoLoginSelect');
@@ -152,6 +152,8 @@ abstract class Bd_Orm_Main_Base_Account extends Bd_Db_Record
         		$select->add('account_id', $id);
         		$record = $table->fetchRow($select);
         		$record->bindAccount($this);
+        	} else {
+        		$record = null;
         	}
         	
         	$this->_relations['AutoLogin'] = $record;
@@ -215,17 +217,25 @@ abstract class Bd_Orm_Main_Base_Account extends Bd_Db_Record
         
         if($arg || !array_key_exists('Entry', $this->_relations))
         {
-            list($select, $db) = $this->_detectGetterArg($arg, 'getEntrySelect');
-        	
-            $table = Bd_Orm_Main_Entry::getTable();
-            $select->add('account_id', $this->getId(), 'entry');
-            $records = $table->fetchAll($select);
-            
-        			foreach($records as $record)
-        		    {
-        				$record->bindAccount($this);
-        		    }
+            $id = $this->getId();
         
+            if ($id)
+            {
+                list($select, $db) = $this->_detectGetterArg($arg, 'getEntrySelect');
+        	
+                $table = Bd_Orm_Main_Entry::getTable();
+                $select->add('account_id', $id, 'entry');
+                $records = $table->fetchAll($select);
+            
+                foreach($records as $record)
+                {
+                    $record->bindAccount($this);
+                }
+            }
+            else
+            {
+                $records = new Bd_Db_Record_List();
+            }
                     
             $this->_relations['Entry'] = $records;
         }
