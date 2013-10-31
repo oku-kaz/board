@@ -120,9 +120,16 @@ abstract class Bd_Orm_Main_Base_Thread extends Bd_Db_Record
         	{
             	list($select, $db) = $this->_detectGetterArg($arg, 'getTagSelect');
         	
-            	$table = $select->getTable();
-           		$select->add('thread_id', $this->getId(), $table->getAlias());
-           		$middle_records = $table->fetchAll($select);
+            	$id = $this->getId();
+        
+            	if($id)
+            	{
+            		$table = $select->getTable();
+            		$select->add('thread_id', $id, $table->getAlias());
+            		$middle_records = $table->fetchAll($select);
+            	} else {
+            		$middle_records = new Bd_Db_Record_List();
+            	}
             
             	$this->_relations['ThreadTag'] = $middle_records;
             	if(isset($this->_tmp_relations['ThreadTag']))
@@ -364,17 +371,25 @@ abstract class Bd_Orm_Main_Base_Thread extends Bd_Db_Record
         
         if($arg || !array_key_exists('Entry', $this->_relations))
         {
-            list($select, $db) = $this->_detectGetterArg($arg, 'getEntrySelect');
-        	
-            $table = Bd_Orm_Main_Entry::getTable();
-            $select->add('thread_id', $this->getId(), 'entry');
-            $records = $table->fetchAll($select);
-            
-        			foreach($records as $record)
-        		    {
-        				$record->bindThread($this);
-        		    }
+            $id = $this->getId();
         
+            if ($id)
+            {
+                list($select, $db) = $this->_detectGetterArg($arg, 'getEntrySelect');
+        	
+                $table = Bd_Orm_Main_Entry::getTable();
+                $select->add('thread_id', $id, 'entry');
+                $records = $table->fetchAll($select);
+            
+                foreach($records as $record)
+                {
+                    $record->bindThread($this);
+                }
+            }
+            else
+            {
+                $records = new Bd_Db_Record_List();
+            }
                     
             $this->_relations['Entry'] = $records;
         }
@@ -515,17 +530,25 @@ abstract class Bd_Orm_Main_Base_Thread extends Bd_Db_Record
         
         if($arg || !array_key_exists('ThreadTag', $this->_relations))
         {
-            list($select, $db) = $this->_detectGetterArg($arg, 'getThreadTagSelect');
-        	
-            $table = Bd_Orm_Main_ThreadTag::getTable();
-            $select->add('thread_id', $this->getId(), 'thread_tag');
-            $records = $table->fetchAll($select);
-            
-        			foreach($records as $record)
-        		    {
-        				$record->bindThread($this);
-        		    }
+            $id = $this->getId();
         
+            if ($id)
+            {
+                list($select, $db) = $this->_detectGetterArg($arg, 'getThreadTagSelect');
+        	
+                $table = Bd_Orm_Main_ThreadTag::getTable();
+                $select->add('thread_id', $id, 'thread_tag');
+                $records = $table->fetchAll($select);
+            
+                foreach($records as $record)
+                {
+                    $record->bindThread($this);
+                }
+            }
+            else
+            {
+                $records = new Bd_Db_Record_List();
+            }
                     
             $this->_relations['ThreadTag'] = $records;
         }
