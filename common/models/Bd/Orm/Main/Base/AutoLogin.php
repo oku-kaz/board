@@ -94,26 +94,29 @@ abstract class Bd_Orm_Main_Base_AutoLogin extends Bd_Db_Record
      */
     public function getAccount($arg = null)
     {
-        /*if($this->isNew())
-        {
-        	return null;
-        }*/
         $this->_relation_save = true;
          
         if($arg || !array_key_exists('Account', $this->_relations))
         {
-        	list($select, $db) = $this->_detectGetterArg($arg, 'getAccountSelect');
-        	
-        	$table = Bd_Orm_Main_Account::getTable();
-        	$select->add('id', $this->getAccountId(), 'account');
-        	$record = $table->fetchRow($select);
-        	
-        		if($record && !($record instanceof Sdx_Null))
-        	{
-        		$record->bindAutoLogin($this);
-        	}
+        	$account_id = $this->getAccountId();
         
-        		   
+        	if($account_id)
+        	{
+        		list($select, $db) = $this->_detectGetterArg($arg, 'getAccountSelect');
+        
+        		$table = Bd_Orm_Main_Account::getTable();
+        		$select->add('id', $account_id, 'account');
+        		$record = $table->fetchRow($select);
+        
+        		if($record && !($record instanceof Sdx_Null))
+        		{
+        			$record->bindAutoLogin($this);
+        		}
+        
+        	} else {
+        		$record = null;
+        	}
+        	
         	$this->_relations['Account'] = $record;
         }
         		
