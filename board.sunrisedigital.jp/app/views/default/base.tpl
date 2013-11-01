@@ -40,6 +40,8 @@
                 <i class="icon-user icon-large"></i>
                 {if $sdx_user->hasId()}
                   <i class="fa fa-user"></i> {$sdx_context->getVar('signed_account')->getName()}
+                {else}
+                  <i class="fa fa-sign-in"></i>
                 {/if}
                 <b class="caret"></b>
               </a>
